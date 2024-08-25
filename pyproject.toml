@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "projected_gradients"
+version = "0.1.0"
+description = ""
+authors = ["cybershiptrooper <cybershiptrooper@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pytest = "^8.2.2"
+transformers = "^4.41.2"
+transformers-stream-generator = "^0.0.5"
+tiktoken = "^0.7.0"
+transformer-lens = "^2.1.0"
+einops = "^0.8.0"
+jaxtyping = "^0.2.31"
+plotly = "^5.22.0"
+scikit-learn = "^1.5.0"
+matplotlib = "^3.9.0"
+pyright = "^1.1.369"
+pip-tools = "^7.4.1"
+ruff = "^0.5.0"
+
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
