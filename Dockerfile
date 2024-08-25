@@ -18,7 +18,7 @@ COPY pyproject.toml poetry.lock ./
 # In case we need submodules in the future...
 # COPY submodules ./submodules
 
-RUN apt-get update -q && apt-get install -y --no-install-recommends libgl1-mesa-glx graphviz graphviz-dev tmux \
+RUN apt-get update -q && apt-get install -y --no-install-recommends git vim nano curl wget htop tmux zip unzip iputils-ping openssh-server libgl1-mesa-glx graphviz graphviz-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
