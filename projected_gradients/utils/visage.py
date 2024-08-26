@@ -36,25 +36,28 @@ def make_perturbed_model(
 def visage(
     model: AutoModelForCausalLM,
     tokenizer: AutoTokenizer,
-    ndim: int,
     prompts: list[str],
     detect_toks: list[int],
+    ndim: int | None = None,
     names_of_params: list[str] | str = "all",
     ratios: list = np.linspace(-5, 5, 11),
     safety_score_type: str = Literal["log_odds", "substring"],
     projected: bool = False,
     score_fn_kwargs: dict = {},
-    it_model: AutoModelForCausalLM = None,
-    projections: ProjectionStore = None,
+    it_model: AutoModelForCausalLM | None = None,
+    projections: ProjectionStore | None = None,
     projection_type: Literal["right", "left", "both"] = "right",
     seed: int = 0,
 ):
     if projected:
-        assert it_model is not None or projections is not None, ValueError(
+        assert (it_model is not None or projections is not None), ValueError(
             "If projected is True, either it_model or projections must be provided."
         )
         if it_model is not None:
-            perturbation, projection = make_projected_perturbations(
+            assert ndim is not None, ValueError(
+                "If no projections are provided, ndim must be provided."
+            )
+            perturbation = make_projected_perturbations(
                 model, it_model, names_of_params, ndim, seed, projection_type
             )
         else:

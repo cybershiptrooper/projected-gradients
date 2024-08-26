@@ -1,9 +1,12 @@
-from projected_gradients.store import Store
-import torch
+import gc
 from typing import List, Literal
-from projected_gradients.projection import ProjectionStore, Projection
-from projected_gradients.svd_projection import SVDProjectionStore
+
 import numpy as np
+import torch
+
+from projected_gradients.projection import Projection, ProjectionStore
+from projected_gradients.store import Store
+from projected_gradients.svd_projection import SVDProjectionStore
 
 
 class PerturbationStore(Store):
@@ -52,6 +55,8 @@ def project_perturbations(
     Projects the perturbations away from the top singular vectors of the difference between the parameters.
     """
     for name, perturbation_vector in perturbations.store.items():
+        gc.collect()
+        torch.cuda.empty_cache()
         try:
             p_map: Projection = projections.store[name]
         except KeyError:
@@ -70,6 +75,7 @@ def make_projected_perturbations(
     ndim: int,
     seed: int = 0,
     projection_type: Literal["left", "right", "both"] = "right",
+    return_projections: bool = False,
 ) -> tuple[PerturbationStore, ProjectionStore]:
     """
     Constructs a PerturbationStore object from the given parameters
@@ -84,5 +90,12 @@ def make_projected_perturbations(
         projection_type=projection_type,
     )
     project_perturbations(perturbations, projections)
-
-    return perturbations, projections
+    # check if NaNs are present
+    assert not any(
+        torch.isnan(perturbation).any() for perturbation in perturbations.store.values()
+    ), "NaNs found in perturbations"
+    if return_projections:
+        return perturbations, projections
+    del projections
+    torch.cuda.empty_cache()
+    return perturbations

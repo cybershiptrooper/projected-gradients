@@ -34,9 +34,13 @@ class SVDProjectionStore(ProjectionStore):
 
     def bias_diff(self, sft_bias: torch.Tensor, it_bias: torch.Tensor) -> torch.Tensor:
         """
-        Returns the difference between the biases of the models
+        Returns the directional change in bias.
         """
-        return sft_bias - it_bias
+        change_in_bias = sft_bias - it_bias
+        change_in_bias /= torch.norm(change_in_bias)
+
+        return change_in_bias
+
 
     def _svd_projection(
         self, sft_param: torch.Tensor, it_param: torch.Tensor
@@ -48,8 +52,9 @@ class SVDProjectionStore(ProjectionStore):
             param_diff = sft_param - it_param
             u, s, v = torch.svd(param_diff)
             v = v.transpose(0, -1)
-            top_right_singular_vectors = v[: self.ndim]
-            top_left_singular_vectors = u[: self.ndim]
+            # pick first ndim columns of v and u
+            top_right_singular_vectors = v[:, : self.ndim].T
+            top_left_singular_vectors = u[:, : self.ndim].T
 
         projection = Projection(
             left_param=top_left_singular_vectors

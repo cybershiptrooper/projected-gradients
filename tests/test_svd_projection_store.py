@@ -14,7 +14,7 @@ def test_svd_projection_store():
     assert projection_store.ndim == 3
     assert projection_store.names_of_params == ["weight"]
 
-    top_singular_vector = projection_store["weight"].right_param[0]
+    top_singular_vector = projection_store["weight"].right_param[:, 0]
     assert torch.allclose(top_singular_vector * 3**0.5, -torch.ones(3), atol=1e-3), (
         top_singular_vector * 3**0.5
     )
