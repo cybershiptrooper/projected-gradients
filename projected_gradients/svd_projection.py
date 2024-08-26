@@ -50,7 +50,7 @@ class SVDProjectionStore(ProjectionStore):
         """
         with torch.no_grad():
             param_diff = sft_param - it_param
-            u, s, v = torch.svd(param_diff)
+            u, s, v = torch.linalg.svd(param_diff, full_matrices=True)
             v = v.transpose(0, -1)
             # pick first ndim columns of v and u
             top_right_singular_vectors = v[:, : self.ndim].T
@@ -65,4 +65,4 @@ class SVDProjectionStore(ProjectionStore):
             else None,
         )
 
-        return projection, param_diff
+        return projection, s[: self.ndim]

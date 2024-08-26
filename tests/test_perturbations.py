@@ -21,7 +21,7 @@ def test_make_projected_perturbations():
 
     with torch.no_grad():
         diff_matrix = sft_model.weight - it_model.weight
-        u, s, v = torch.svd(diff_matrix)
+        u, s, v = torch.linalg.svd(diff_matrix, full_matrices=True)
         top_v_outer_products = torch.einsum("ki,kj->ij", v[:k], v[:k])
         diff_projected_to_top_singular_vector = diff_matrix @ top_v_outer_products
         diff_projected_to_top_singular_vector /= torch.norm(
@@ -31,7 +31,7 @@ def test_make_projected_perturbations():
     perturbation_vector = perturbation.store["weight"] / torch.norm(
         perturbation.store["weight"]
     )
-
+    print(perturbation_vector @ top_v_outer_products)
     assert torch.isclose(
         perturbation_vector @ top_v_outer_products,
         torch.zeros_like(perturbation_vector),
