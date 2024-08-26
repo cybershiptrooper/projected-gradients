@@ -33,7 +33,9 @@ class PerturbationStore(Store):
                     .to(param.device)
                     .type(param.dtype)
                 )
+                # rescale the perturbation to have the same norm as the parameter
                 perturbations[name] /= torch.norm(perturbations[name])
+                perturbations[name] *= torch.norm(param)
         return perturbations
 
     def __mul__(self, scalar: float) -> "PerturbationStore":
@@ -79,7 +81,7 @@ def make_projected_perturbations(
         names_of_params=perturbations.names_of_params,
         sft_model=sft_model,
         it_model=it_model,
-        projection_type=projection_type
+        projection_type=projection_type,
     )
     project_perturbations(perturbations, projections)
 

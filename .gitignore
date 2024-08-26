@@ -1,5 +1,4 @@
 # custom files go here
-*.json
 *.pt*
 *.pkl
 *.png
@@ -9,8 +8,6 @@ results/*
 TODO.md
 *rough*
 test-results
-*.csv
-*.txt
 *.yaml
 
 # Byte-compiled / optimized / DLL files

@@ -46,6 +46,7 @@ def visage(
     score_fn_kwargs: dict = {},
     it_model: AutoModelForCausalLM = None,
     projections: ProjectionStore = None,
+    projection_type: Literal["right", "left", "both"] = "right",
     seed: int = 0,
 ):
     if projected:
@@ -54,7 +55,7 @@ def visage(
         )
         if it_model is not None:
             perturbation, projection = make_projected_perturbations(
-                model, it_model, names_of_params, ndim, seed
+                model, it_model, names_of_params, ndim, seed, projection_type
             )
         else:
             perturbation = PerturbationStore(model, names_of_params, seed)
@@ -76,6 +77,7 @@ def visage(
         safety_scores[i] = safety_score_fn(
             prompt=prompts, detect_toks=detect_toks, **score_fn_kwargs
         )
+        del perturbed_model
 
     pbar.close()
     return safety_scores

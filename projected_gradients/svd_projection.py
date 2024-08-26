@@ -1,5 +1,3 @@
-from typing import Literal
-
 import torch
 
 from projected_gradients.projection import Projection, ProjectionStore

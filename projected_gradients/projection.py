@@ -28,29 +28,38 @@ class Projection:
                 "ki,kj->ij", left_param, left_param
             )
             left_projection_matrix = (
-                torch.eye(left_param_outer_products.shape[0])
+                torch.eye(left_param_outer_products.shape[0]).to(perturbation.device)
                 - left_param_outer_products
             )
         else:
-            left_projection_matrix = torch.eye(perturbation.shape[0])
+            left_projection_matrix = torch.eye(perturbation.shape[0]).to(
+                perturbation.device
+            )
 
         if right_param is not None:
             right_param_outer_products = torch.einsum(
                 "ki,kj->ij", right_param, right_param
             )
             right_projection_matrix = (
-                torch.eye(right_param_outer_products.shape[-1])
+                torch.eye(right_param_outer_products.shape[-1]).to(perturbation.device)
                 - right_param_outer_products
             )
         else:
-            right_projection_matrix = torch.eye(perturbation.shape[-1])
+            right_projection_matrix = torch.eye(perturbation.shape[-1]).to(
+                perturbation.device
+            )
 
         ans = left_projection_matrix @ perturbation @ right_projection_matrix
         return ans / torch.norm(ans)
 
 
 class ProjectionStore(Store[str, Projection], ABC):
-    def __init__(self, ndim: int, names_of_params: list[str], projection_type: Literal["left", "right", "both"] = "right"):
+    def __init__(
+        self,
+        ndim: int,
+        names_of_params: list[str],
+        projection_type: Literal["left", "right", "both"] = "right",
+    ):
         """
         Makes a projection store object with ndim vectors for the given parameter set
         """

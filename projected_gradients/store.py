@@ -18,21 +18,21 @@ class Store(dict, ABC):
 
     def get_store(self):
         return self.store
-    
+
     def __repr__(self):
         return str(self.store)
-    
+
     def __str__(self):
         return str(self.store)
-    
+
     def items(self) -> dict_items:
         return self.store.items()
-    
+
     def keys(self) -> list:
         return self.store.keys()
-    
+
     def values(self) -> list:
         return self.store.values()
-    
+
     def __len__(self) -> int:
         return len(self.store)
