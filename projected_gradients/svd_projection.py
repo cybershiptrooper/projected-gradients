@@ -9,12 +9,9 @@ class SVDProjectionStore(ProjectionStore):
     def __init__(
         self,
         *args,
-        projection_type: Literal["left", "right", "both"] = "right",
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        self.projection_type = projection_type
-        assert self.projection_type in ["left", "right", "both"]
 
     def construct_projections(
         self, sft_model: torch.nn.Module, it_model: torch.nn.Module

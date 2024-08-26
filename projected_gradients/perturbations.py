@@ -1,6 +1,6 @@
 from projected_gradients.store import Store
 import torch
-from typing import List
+from typing import List, Literal
 from projected_gradients.projection import ProjectionStore, Projection
 from projected_gradients.svd_projection import SVDProjectionStore
 import numpy as np
@@ -67,6 +67,7 @@ def make_projected_perturbations(
     names_of_params: list[str] | str,
     ndim: int,
     seed: int = 0,
+    projection_type: Literal["left", "right", "both"] = "right",
 ) -> tuple[PerturbationStore, ProjectionStore]:
     """
     Constructs a PerturbationStore object from the given parameters
@@ -78,6 +79,7 @@ def make_projected_perturbations(
         names_of_params=perturbations.names_of_params,
         sft_model=sft_model,
         it_model=it_model,
+        projection_type=projection_type
     )
     project_perturbations(perturbations, projections)
 
