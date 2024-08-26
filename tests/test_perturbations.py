@@ -17,7 +17,9 @@ def test_make_projected_perturbations():
     assert perturbation.names_of_params == projection.names_of_params
     for name, perturbation_vector in perturbation.store.items():
         assert perturbation_vector.shape == torch.Size([3, 3])
-        assert torch.allclose(torch.norm(perturbation_vector), torch.norm(sft_model.weight))
+        assert torch.allclose(
+            torch.norm(perturbation_vector), torch.norm(sft_model.weight)
+        )
 
     with torch.no_grad():
         diff_matrix = sft_model.weight - it_model.weight

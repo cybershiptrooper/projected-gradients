@@ -1,6 +1,7 @@
 import torch
 
-from projected_gradients.projection import Projection, ProjectionStore
+from projected_gradients.ProjectionStore import ProjectionStore
+from projected_gradients.projection import Projection, BiasProjection
 
 
 class SVDProjectionStore(ProjectionStore):
@@ -20,30 +21,40 @@ class SVDProjectionStore(ProjectionStore):
         projections = {}
         self.projection_values = {}
         for name in self.names_of_params:
-            if "bias" in name:
-                # TODO: Implement bias projection
-                raise NotImplementedError("Bias projection not implemented")
-
             param = sft_model.state_dict()[name]
             corresponding_param = it_model.state_dict()[name]
-            projections[name], self.projection_values[name] = self._svd_projection(
-                param, corresponding_param
+            call_method = self._svd_projection
+            if "bias" in name:
+                call_method = self.bias_diff
+            projections[name], self.projection_values[name] = call_method(
+                param, corresponding_param, name_of_param=name
             )
 
         return projections
 
-    def bias_diff(self, sft_bias: torch.Tensor, it_bias: torch.Tensor) -> torch.Tensor:
+    def bias_diff(
+        self,
+        sft_bias: torch.Tensor,
+        it_bias: torch.Tensor,
+        name_of_param: str | None = None,
+    ) -> tuple[BiasProjection, None]:
         """
         Returns the directional change in bias.
         """
         change_in_bias = sft_bias - it_bias
         change_in_bias /= torch.norm(change_in_bias)
 
-        return change_in_bias
-
+        return BiasProjection(
+            change_in_bias,
+            self.keep_in_files,
+            self.make_param_dir(name_of_param=name_of_param),
+        ), None
 
     def _svd_projection(
-        self, sft_param: torch.Tensor, it_param: torch.Tensor
+        self,
+        sft_param: torch.Tensor,
+        it_param: torch.Tensor,
+        name_of_param: str | None = None,
     ) -> tuple[Projection, torch.Tensor]:
         """
         Returns the top ndim right singular vectors of the difference between the parameters.
@@ -63,6 +74,8 @@ class SVDProjectionStore(ProjectionStore):
             right_param=top_right_singular_vectors
             if self.projection_type in ["right", "both"]
             else None,
+            keep_in_files=self.keep_in_files,
+            dump_dir=self.make_param_dir(name_of_param=name_of_param),
         )
 
         return projection, s[: self.ndim]

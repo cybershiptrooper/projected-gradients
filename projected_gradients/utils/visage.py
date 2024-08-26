@@ -13,7 +13,7 @@ from projected_gradients.perturbations import (
 )
 from projected_gradients.utils import make_safety_score
 from projected_gradients.utils.tqdm import tqdm
-from projected_gradients.projection import ProjectionStore
+from projected_gradients.ProjectionStore import ProjectionStore
 
 
 def make_perturbed_model(
@@ -50,7 +50,7 @@ def visage(
     seed: int = 0,
 ):
     if projected:
-        assert (it_model is not None or projections is not None), ValueError(
+        assert it_model is not None or projections is not None, ValueError(
             "If projected is True, either it_model or projections must be provided."
         )
         if it_model is not None:

@@ -4,7 +4,8 @@ from typing import List, Literal
 import numpy as np
 import torch
 
-from projected_gradients.projection import Projection, ProjectionStore
+from projected_gradients.ProjectionStore import ProjectionStore
+from projected_gradients.projection import Projection
 from projected_gradients.store import Store
 from projected_gradients.svd_projection import SVDProjectionStore
 

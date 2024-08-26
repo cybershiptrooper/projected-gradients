@@ -1,7 +1,9 @@
 from torch.nn.modules import Module
+
+from projected_gradients.ProjectionStore import ProjectionStore
 from .trainer_config import TrainerConfig
 from .generic_trainer import GenericLLMTrainer
-from projected_gradients.projection import Projection, ProjectionStore
+from projected_gradients.projection import Projection
 
 
 class ProjectedTrainer(GenericLLMTrainer):
@@ -15,7 +17,7 @@ class ProjectedTrainer(GenericLLMTrainer):
         tokens = batch
         inputs, targets = tokens[:, :-1], tokens[:, 1:]
         inputs, targets = inputs.to(self.device), targets.to(self.device)
-        
+
         self.optimizer.zero_grad()
         outputs = self.model(inputs)
         loss = self.criterion(outputs, targets)
