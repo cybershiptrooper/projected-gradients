@@ -28,14 +28,30 @@ class Score:
         self,
         model: AutoModelForCausalLM,
         tokenizer: AutoTokenizer,
+        batched: bool = True,
+        batch_size: int = 50,
     ):
         self.model = model
         self.tokenizer = tokenizer
+        self.batched = batched
+        self.batch_size = batch_size
 
     def __call__(self, prompt: List[str], *args, **kwargs):
+        if self.batched:
+            scores = []
+            num_iters = len(prompt) // self.batch_size
+            for i in range(num_iters):
+                start = i * self.batch_size
+                end = start + self.batch_size
+                if end > len(prompt):
+                    end = len(prompt)
+                mean_score = self.score_fn(prompt[start:end], *args, **kwargs)
+                total_score = mean_score * (end - start)
+                scores.append(total_score)
+            return sum(scores) / len(prompt)
         return self.score_fn(prompt, *args, **kwargs)
 
-    def score_fn(self, prompt, detect_toks, *args, **kwargs):
+    def score_fn(self, prompt, detect_toks, *args, **kwargs) -> float:
         raise NotImplementedError
 
 
@@ -51,14 +67,6 @@ class LogOddsScore(Score):
 
 
 class SubstringMatchingScore(Score):
-    def __init__(
-        self,
-        model: AutoModelForCausalLM,
-        tokenizer: AutoTokenizer,
-    ):
-        self.model = model
-        self.tokenizer = tokenizer
-
     def score_fn(
         self,
         prompt: List[str],

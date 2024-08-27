@@ -43,9 +43,27 @@ class PerturbationStore(Store):
         return perturbations
 
     def __mul__(self, scalar: float) -> "PerturbationStore":
+        """In place multiplication of the perturbations"""
         for name in self.names_of_params:
             self.store[name] *= scalar
         return self
+    
+    def dump(self, dump_dir: str) -> None:
+        """
+        Dumps the perturbations to the given directory
+        """
+        for name, perturbation in self.store.items():
+            torch.save(perturbation, f"{dump_dir}/{name}.pt")
+    
+    def load(self, dump_dir: str) -> None:
+        """
+        Loads the perturbations from the given directory
+        """
+        self.store = {}
+        gc.collect()
+        torch.cuda.empty_cache()
+        for name in self.names_of_params:
+            self.store[name] = torch.load(f"{dump_dir}/{name}.pt")
 
 
 def project_perturbations(

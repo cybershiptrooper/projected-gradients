@@ -1,5 +1,6 @@
 import copy
 import gc
+import os
 from typing import Literal
 
 import numpy as np
@@ -11,9 +12,9 @@ from projected_gradients.perturbations import (
     make_projected_perturbations,
     project_perturbations,
 )
+from projected_gradients.ProjectionStore import ProjectionStore
 from projected_gradients.utils import make_safety_score
 from projected_gradients.utils.tqdm import tqdm
-from projected_gradients.ProjectionStore import ProjectionStore
 
 
 def make_perturbed_model(
@@ -68,12 +69,21 @@ def visage(
     pbar = tqdm(total=len(ratios), desc="Generating safety scores")
     safety_scores = np.zeros_like(ratios)
 
+    temp_dir = "results/perturbation"
+    os.makedirs(temp_dir, exist_ok=True)
+    perturbation.dump(temp_dir)
+
     for i, r in enumerate(ratios):
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
+        # I need to remake the perturbation object every time as it is modified in place
+        # I can't make a copy of the object as it is too large
+        # TODO: Find a better way to do this
+        perturbation.load(temp_dir)
         pbar.update(1)
         perturbed_model = make_perturbed_model(model, perturbation * r)
+
         safety_score_fn = make_safety_score(
             safety_score_type, perturbed_model, tokenizer
         )
