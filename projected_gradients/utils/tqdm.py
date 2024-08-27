@@ -11,9 +11,9 @@ def is_notebook() -> bool:
         return False  # Probably standard Python interpreter
 
 
-if is_notebook():
-    from tqdm.notebook import tqdm
-else:
-    from tqdm import tqdm
+# if is_notebook():
+#     from tqdm.notebook import tqdm
+# else:
+from tqdm import tqdm # noqa
 
 __all__ = ["tqdm"]

@@ -8,11 +8,6 @@ k8s
 *.png
 *.csv
 
-.git
-.github
-.dockerignore
-.gitignore
-
 .idea
 .vscode
 

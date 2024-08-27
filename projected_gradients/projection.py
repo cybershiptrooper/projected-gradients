@@ -26,8 +26,8 @@ class Projection:
             if right_param is not None:
                 torch.save(right_param, self.right_param_file)
         else:
-            self._left_param = left_param
-            self._right_param = right_param
+            self._left_param = left_param.to("cpu") if left_param is not None else None
+            self._right_param = right_param.to("cpu") if right_param is not None else None
 
     @property
     def left_param(self) -> Optional[Float[torch.Tensor, "ndim d"]]:  # noqa: F722
@@ -48,10 +48,10 @@ class Projection:
         return self._right_param
 
     def do_complementary_projection(self, perturbation: torch.tensor) -> torch.tensor:
-        left_param = self.left_param
-        right_param = self.right_param
-
-        if left_param is not None:
+        if self.left_param is not None:
+            left_param = self.left_param.to(perturbation.device).type(
+                perturbation.dtype
+            )
             left_param_outer_products = torch.einsum(
                 "ki,kj->ij", left_param, left_param
             )
@@ -64,7 +64,10 @@ class Projection:
                 perturbation.device
             )
 
-        if right_param is not None:
+        if self.right_param is not None:
+            right_param = self.right_param.to(perturbation.device).type(
+                perturbation.dtype
+            )
             right_param_outer_products = torch.einsum(
                 "ki,kj->ij", right_param, right_param
             )
@@ -78,7 +81,8 @@ class Projection:
             right_projection_matrix = torch.eye(perturbation.shape[-1]).to(
                 perturbation.device
             )
-
+        left_projection_matrix = left_projection_matrix.type(perturbation.dtype)
+        right_projection_matrix = right_projection_matrix.type(perturbation.dtype)
         ans = left_projection_matrix @ perturbation @ right_projection_matrix
 
         # save memory

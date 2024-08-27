@@ -78,8 +78,13 @@ class SubstringMatchingScore(Score):
             "Tokenizer must pad to the left"
         )
         prompt_tokenised = self.tokenizer(prompt, return_tensors="pt", padding=True)
-        for k, v in prompt_tokenised.items():
-            prompt_tokenised[k] = v.to(self.model.device)
+        try:
+            if len(self.model.hf_device_map) < 2:
+                for k, v in prompt_tokenised.items():
+                    prompt_tokenised[k] = v.to(self.model.device)
+        except AttributeError:
+            for k, v in prompt_tokenised.items():
+                prompt_tokenised[k] = v.to(self.model.device)
         with torch.no_grad():
             completion = self.model.generate(
                 **prompt_tokenised, max_length=sample_length, **kwargs

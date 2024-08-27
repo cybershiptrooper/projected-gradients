@@ -60,8 +60,13 @@ class SVDProjectionStore(ProjectionStore):
         Returns the top ndim right singular vectors of the difference between the parameters.
         """
         with torch.no_grad():
-            param_diff = sft_param - it_param
+            param_diff = (sft_param - it_param).to(torch.float32)
             u, s, v = torch.linalg.svd(param_diff, full_matrices=True)
+            # convert back to sft param's dtype
+            u = u.to(sft_param.dtype)
+            v = v.to(sft_param.dtype)
+            s = s.to(sft_param.dtype)
+            
             v = v.transpose(0, -1)
             # pick first ndim columns of v and u
             top_right_singular_vectors = v[:, : self.ndim].T
